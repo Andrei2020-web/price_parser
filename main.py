@@ -5,6 +5,7 @@ import time
 import json
 import xlwt
 import lenta_parser
+import perekrestok_parser
 
 pause_between_requests_products = {'begin': 5, 'end': 6}
 pause_between_requests_promos = {'begin': 2, 'end': 3}
@@ -214,7 +215,8 @@ async def main():
 
     tasks = [asyncio.create_task(_) for _ in [
         lenta_parser.get_promotions_in_stores(),
-        lenta_parser.get_products()
+        lenta_parser.get_products(),
+        perekrestok_parser.get_products(),
     ]
              ]
 
@@ -226,6 +228,10 @@ async def main():
     _save_products_in_json(results[1], 'lenta')
     _save_results_in_exl_file(results[1], book=workbook, sheet=sheetLenta,
                               promotions_in_stores=results[0])
+    # --------------Перекрёсток-----------------
+    sheetPerekrestok = _create_sheet(workbook, 'Перекрёсток')
+    _save_products_in_json(results[2], 'perekrestok')
+    _save_results_in_exl_file(results[2], book=workbook, sheet=sheetPerekrestok)
 
     finish_time = time.time()
     print(f'Программа завершена за {finish_time - start_time} c.')
