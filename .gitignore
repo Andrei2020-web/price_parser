@@ -1,0 +1,6 @@
+/venv/
+/.idea/
+/pycache/
+/db.sqlite3
+/Pipfile
+/Pipfile.lock
