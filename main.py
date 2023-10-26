@@ -7,6 +7,7 @@ import xlwt
 import lenta_parser
 import perekrestok_parser
 import globus_parser
+import sahalin_ryba_parser
 
 pause_between_requests_products = {'begin': 5, 'end': 6}
 pause_between_requests_promos = {'begin': 2, 'end': 3}
@@ -220,6 +221,7 @@ async def main():
         perekrestok_parser.get_products(),
         globus_parser.get_promotions_in_stores(),
         globus_parser.get_products(),
+        sahalin_ryba_parser.get_products(),
     ]
              ]
 
@@ -243,6 +245,11 @@ async def main():
     _save_products_in_json(results[4], 'globus')
     _save_results_in_exl_file(results[4], book=workbook, sheet=sheet_globus,
                               promotions_in_stores=results[3])
+
+    # --------------Сахалин рыба-----------------
+    sheet_sahalin_ryba = _create_sheet(workbook, 'Сахалин рыба')
+    _save_products_in_json(results[5], 'sahalin_ryba')
+    _save_results_in_exl_file(results[5], book=workbook, sheet=sheet_sahalin_ryba)
 
     finish_time = time.time()
     print(f'Программа завершена за {finish_time - start_time} c.')
