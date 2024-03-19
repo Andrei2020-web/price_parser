@@ -67,8 +67,8 @@ async def get_products():
                 price_wrapper = soup.find('div', class_='Flex-brknwi-0 jRbnzW')
                 price_old_wrapper = price_wrapper.find('div', class_='price-old-wrapper')
                 price_regular = price_old_wrapper.find('div',
-                                                       class_='price-old').get_text(
-                    strip=True).replace('\u00A0', '').replace('₽', '')
+                                                       class_='price-old').contents[
+                    -1].strip().replace('\u00A0', '').replace('₽', '')
                 print(f'  -- Обычная цена {price_regular}:')
             except:
                 print(
@@ -76,10 +76,9 @@ async def get_products():
             try:
                 price_wrapper = soup.find('div', class_='Flex-brknwi-0 jRbnzW')
                 price_primary = price_wrapper.find(
-                    'div', class_='price-new').get_text(
-                    strip=True).replace('\u00A0', '').replace('₽', '')
-                print(
-                    f'  -- Цена по карте: {price_primary}')
+                    'div', class_='price-new').contents[-1].strip().replace('\u00A0', '').replace(
+                    '₽', '')
+                print(f'  -- Цена по карте: {price_primary}')
 
             except:
                 print(

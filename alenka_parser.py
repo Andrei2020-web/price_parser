@@ -120,8 +120,8 @@ async def get_products():
                         f'Не удалось прочитать цену со скидкой для товара {product_uri} в магазине {store_id}')
                 try:
                     discount = soup.find(
-                        'div', class_='row', itemtype='http://schema.org/Product').find('span',
-                                                                                        class_='badge-store__text badge-store__text_sale').get_text(
+                        'div', class_='row', itemtype='https://schema.org/Product').find('span',
+                                                                                         class_='badge-store__text badge-store__text_sale').get_text(
                         strip=True).replace('\u00A0', '')
                     print(f'  -- Скидка {discount}')
                 except:
