@@ -161,7 +161,8 @@ async def get_products():
             if html:
                 soup = BeautifulSoup(html, 'lxml')
                 try:
-                    title_sku = soup.find('div', class_='sku-page__header').getText(
+                    title_sku = soup.find('h1',
+                                          class_='Title_title__jcDAb Product_cardTitle__GhDos').getText(
                         strip=True).replace('\u00A0', '')
                     print(f'[+] Товар {title_sku}')
                 except:
@@ -169,8 +170,8 @@ async def get_products():
                     print(
                         f"Не удалось прочитать наименование товара {product_uri} в магазине {store_id}")
                 try:
-                    shop_addr = soup.find('div',
-                                          class_='main-nav__item-address-wrapper').get_text(
+                    shop_addr = soup.find('span',
+                                          class_='Address_street__Ewkm4').get_text(
                         strip=True)
                     print(f'  -- В магазине лента {shop_addr}:')
                 except:
@@ -178,34 +179,29 @@ async def get_products():
                     print(
                         f"Не удалось прочитать адрес для товара {product_uri} в магазине {store_id}")
                 try:
-                    price_regular = soup.find('div',
-                                              class_='price-label price-label--regular sku-price sku-price--regular sku-prices-block__price').find(
-                        'span', class_='price-label__integer').get_text(
+                    price_regular = soup.find('p',
+                                              class_='Price_secondaryPrice__ppVFT').get_text(
                         strip=True).replace(
-                        '\u00A0', '')
+                        '\u00A0', '').replace('обычная цена', '')
                     print(f'  -- Обычная цена {price_regular}:')
                 except:
                     price_regular = ''
                     print(
                         f"Не удалось прочитать обычную цену для товара {product_uri} в магазине {store_id}")
                 try:
-                    price_primary = soup.find('div',
-                                              class_='sku-prices-block__item sku-prices-block__item--primary').find(
-                        'span', class_='price-label__integer').get_text(
-                        strip=True).replace(
-                        '\u00A0', '')
-                    print(
-                        f'  -- Цена по карте: {price_primary}')
+                    price_primary = soup.find('p',
+                                              class_=['Price_mainPrice__T9yBp Price_red__b91DW',
+                                                      'Price_mainPrice__T9yBp']).get_text(
+                        strip=True).replace('\u00A0', '').replace('по карте', '')
+                    print(f'  -- Цена по карте: {price_primary}')
                 except:
                     price_primary = ''
                     print(
                         f"Не удалось прочитать цену со скидкой для товара {product_uri} в магазине {store_id}")
                 try:
-                    div_tag = \
-                        soup.find('div',
-                                  class_='discount-label-small discount-label-small--sku-page sku-page__discount-label')
-                    if div_tag:
-                        discount = div_tag.get_text(strip=True).replace('\u00A0', '')
+                    discount = soup.find('span',
+                                         class_='Product_discountBadge__40fed Badge_badge__w952k Badge_badge_color_red__36Xhs Badge_badge_size_large__tNWP6 Badge_badge_number__mQzYy').get_text(
+                        strip=True).replace('\u00A0', '')
                     print(
                         f'  -- Скидка {discount}')
                 except:
@@ -213,33 +209,14 @@ async def get_products():
                         f"Не удалось прочитать скидку для товара {product_uri} в магазине {store_id}")
                 try:
                     div = \
-                        soup.find('div',
-                                  class_='stock stock--many sku-store-container__stock')
+                        soup.find('span',
+                                  class_=[
+                                      'Badge_badge__w952k Badge_badge_color_greenSecondary__2cVlN Badge_badge_size_medium__feig9',
+                                      'Badge_badge__w952k Badge_badge_color_orangeSecondary__l7hYO Badge_badge_size_medium__feig9',
+                                      'Badge_badge__w952k Badge_badge_color_redSecondary__i_Xad Badge_badge_size_medium__feig9'])
                     if div:
                         enough = div.get_text(strip=True).replace('\u00A0', '')
                         print(f'  -- {enough}')
-
-                    div = \
-                        soup.find('div',
-                                  class_='stock stock--enough sku-store-container__stock')
-                    if div:
-                        enough = div.get_text(strip=True).replace('\u00A0', '')
-                        print(f'  -- {enough}')
-
-                    div = \
-                        soup.find('div',
-                                  class_='stock stock--few sku-store-container__stock')
-                    if div:
-                        enough = div.get_text(strip=True).replace('\u00A0', '')
-                        print(f'  -- {enough}')
-
-                    div = \
-                        soup.find('div',
-                                  class_='stock stock--none sku-store-container__stock')
-                    if div:
-                        enough = div.get_text(strip=True).replace('\u00A0', '')
-                        print(f'  -- {enough}')
-
                 except:
                     print(
                         f"Не удалось прочитать наличие товара {product_uri} в магазине {store_id}")
