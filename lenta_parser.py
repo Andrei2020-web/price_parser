@@ -1,7 +1,9 @@
 import asyncio
 from bs4 import BeautifulSoup
-import json
+from nested_lookup import nested_lookup
+import datetime
 import random
+import json
 import lxml
 import main
 
@@ -143,7 +145,10 @@ async def get_products():
             price_regular = ''
             price_primary = ''
             discount = ''
+            validityStartDate = ''
+            validityEndDate = ''
             enough = ''
+            mass = 0
 
             # Кол-во повторов, чтобы получить html документ с товаром
             for i in range(main.number_of_attempts):
@@ -160,10 +165,12 @@ async def get_products():
                     await asyncio.sleep(main.pause_between_attempts_to_get_html)
             if html:
                 soup = BeautifulSoup(html, 'lxml')
+                json_next_data = json.loads(
+                    soup.find('script', attrs={'id': '__NEXT_DATA__'}).string)
                 try:
-                    title_sku = soup.find('h1',
-                                          class_='Title_title__jcDAb Product_cardTitle__GhDos').getText(
-                        strip=True).replace('\u00A0', '')
+                    title_sku = nested_lookup(
+                        key='title',
+                        document=json_next_data)[0]
                     print(f'[+] Товар {title_sku}')
                 except:
                     title_sku = 'Не удалось прочитать наименование товара'
@@ -179,29 +186,72 @@ async def get_products():
                     print(
                         f"Не удалось прочитать адрес для товара {product_uri} в магазине {store_id}")
                 try:
-                    price_regular = soup.find('p',
-                                              class_='Price_secondaryPrice__ppVFT').get_text(
-                        strip=True).replace(
-                        '\u00A0', '').replace('обычная цена', '')
+                    mass = int(nested_lookup(
+                        key='package',
+                        document=json_next_data)[0].replace(' г', '').replace(' мл', ''))
+                except:
+                    mass = 0
+                    print(
+                        f'Не удалось прочитать массу для товара {product_uri} в магазине {store_id}')
+                try:
+                    validityStartDateTimeStr = nested_lookup(
+                        key='validityStartDate',
+                        document=json_next_data)[0]
+                    validityStartMonth = datetime.datetime.strptime(validityStartDateTimeStr,
+                                                                    "%Y-%m-%dT%H:%M:%SZ").month
+                    validityStartDay = datetime.datetime.strptime(validityStartDateTimeStr,
+                                                                  "%Y-%m-%dT%H:%M:%SZ").day
+                    validityStartDate = str(validityStartDay) + '.' + str(validityStartMonth)
+                    print(
+                        f'  -- Скидка актуальна с {validityStartDate}')
+                except:
+                    print(
+                        f"Не удалось прочитать с какой даты актуальна скидка для товара {product_uri} в магазине {store_id}")
+                try:
+                    validityEndDateTimeStr = nested_lookup(
+                        key='validityEndDate',
+                        document=json_next_data)[0]
+                    validityEndMonth = datetime.datetime.strptime(validityEndDateTimeStr,
+                                                                  "%Y-%m-%dT%H:%M:%SZ").month
+                    validityEndDay = datetime.datetime.strptime(validityEndDateTimeStr,
+                                                                "%Y-%m-%dT%H:%M:%SZ").day
+                    validityEndDate = str(validityEndDay) + '.' + str(validityEndMonth)
+                    print(
+                        f'  -- Скидка актуальна по {validityEndDate}')
+                except:
+                    print(
+                        f"Не удалось прочитать по какую дату актуальна скидка для товара {product_uri} в магазине {store_id}")
+                try:
+                    price_regular = nested_lookup(
+                        key='regularPrice',
+                        document=json_next_data)[0]
+                    if mass:
+                        # Цена за килограмм
+                        price_regular = f'{price_regular}\nЦена за кг {round(float(price_regular) * 1000 / mass, 2)}'
                     print(f'  -- Обычная цена {price_regular}:')
                 except:
                     price_regular = ''
                     print(
                         f"Не удалось прочитать обычную цену для товара {product_uri} в магазине {store_id}")
                 try:
-                    price_primary = soup.find('p',
-                                              class_=['Price_mainPrice__T9yBp Price_red__b91DW',
-                                                      'Price_mainPrice__T9yBp']).get_text(
-                        strip=True).replace('\u00A0', '').replace('по карте', '')
+                    price_primary = nested_lookup(
+                        key='discountPrice',
+                        document=json_next_data)[0]
+                    if mass:
+                        # Цена за килограмм
+                        price_primary = f'{price_primary}\nЦена за кг {round(float(price_primary) * 1000 / mass, 2)}'
+                        # Инфа по актуальности цен
+                        if validityStartDate:
+                            price_primary = f'{price_primary}\nс {validityStartDate} по {validityEndDate}'
                     print(f'  -- Цена по карте: {price_primary}')
                 except:
                     price_primary = ''
                     print(
                         f"Не удалось прочитать цену со скидкой для товара {product_uri} в магазине {store_id}")
                 try:
-                    discount = soup.find('span',
-                                         class_='Product_discountBadge__40fed Badge_badge__w952k Badge_badge_color_red__36Xhs Badge_badge_size_large__tNWP6 Badge_badge_number__mQzYy').get_text(
-                        strip=True).replace('\u00A0', '')
+                    discount = nested_lookup(
+                        key='offerDescription',
+                        document=json_next_data)[0]
                     print(
                         f'  -- Скидка {discount}')
                 except:

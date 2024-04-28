@@ -211,6 +211,12 @@ def _create_sheet(workbook, stores_name=''):
         f'{stores_name}', cell_overwrite_ok=True)
 
 
+def _freeze_the_cell(sheet, cell_position):
+    sheet.set_horz_split_pos(cell_position)
+    sheet.panes_frozen = True
+    sheet.remove_splits = True
+
+
 async def main():
     start_time = time.time()
 
@@ -231,6 +237,7 @@ async def main():
 
     # --------------Лента-----------------
     sheetLenta = _create_sheet(workbook, 'Лента')
+    _freeze_the_cell(sheetLenta, 1)
     _save_promotions_in_json(results[0], 'lenta')
     _save_products_in_json(results[1], 'lenta')
     _save_results_in_exl_file(results[1], book=workbook, sheet=sheetLenta,
@@ -238,11 +245,13 @@ async def main():
 
     # --------------Перекрёсток-----------------
     sheetPerekrestok = _create_sheet(workbook, 'Перекрёсток')
+    _freeze_the_cell(sheetPerekrestok, 1)
     _save_products_in_json(results[2], 'perekrestok')
     _save_results_in_exl_file(results[2], book=workbook, sheet=sheetPerekrestok)
 
     # --------------Глобус-----------------
     sheet_globus = _create_sheet(workbook, 'Глобус')
+    _freeze_the_cell(sheet_globus, 1)
     _save_promotions_in_json(results[3], 'globus')
     _save_products_in_json(results[4], 'globus')
     _save_results_in_exl_file(results[4], book=workbook, sheet=sheet_globus,
@@ -250,11 +259,13 @@ async def main():
 
     # --------------Сахалин рыба-----------------
     sheet_sahalin_ryba = _create_sheet(workbook, 'Сахалин рыба')
+    _freeze_the_cell(sheet_sahalin_ryba, 1)
     _save_products_in_json(results[5], 'sahalin_ryba')
     _save_results_in_exl_file(results[5], book=workbook, sheet=sheet_sahalin_ryba)
 
     # --------------Алёнка-----------------
     sheet_alenka = _create_sheet(workbook, 'Алёнка')
+    _freeze_the_cell(sheet_alenka, 1)
     _save_products_in_json(results[6], 'alenka')
     _save_results_in_exl_file(results[6], book=workbook, sheet=sheet_alenka)
 
