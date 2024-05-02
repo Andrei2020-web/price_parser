@@ -24,13 +24,6 @@ async def get_products():
     for store_id in stores_id:
         find_products_in_store = []
         for product_uri in products_uri:
-            title_sku = ''
-            shop_addr = ''
-            price_regular = ''
-            price_primary = ''
-            discount = ''
-            enough = ''
-
             # Кол-во повторов, чтобы получить html документ с товаром
             for i in range(main.number_of_attempts):
                 # Пауза между запросами, помогает при блокировке запросов сайтом
@@ -45,55 +38,74 @@ async def get_products():
                     # Пауза между попытками
                     await asyncio.sleep(main.pause_between_attempts_to_get_html)
             if html:
+                price_primary = ''
+                discount = ''
                 soup = BeautifulSoup(html, 'lxml')
-                try:
-                    title_sku = soup.find('div', class_='prd_hdr').getText(
-                        strip=True).replace('\u00A0', '')
-                    print(f'[+] Товар {title_sku}')
-                except:
-                    title_sku = 'Не удалось прочитать наименование товара'
-                    print(
-                        f"Не удалось прочитать наименование товара {product_uri} в магазине {store_id}")
+                title_sku = await _get_title_sku(product_uri, soup, store_id)
                 shop_addr = store_id
                 print(f'  -- В магазине {shop_addr}:')
-                try:
-                    price_regular = soup.find(
-                        'div', class_='prd_rtp prd_rtp1').get_text(
-                        strip=True).replace(
-                        '\u00A0', '')
-                    print(f'  -- Обычная цена {price_regular}:')
-                except:
-                    price_regular = ''
-                    print(
-                        f'Не удалось прочитать обычную цену для товара {product_uri} в магазине {store_id}')
-                try:
-                    store_list = soup.find('div',
-                                           class_='lstcnt lstadr storeblock storelist').find_all(
-                        'div', class_='adritm')
-                    for store in store_list:
-                        div_addres_store = store.find('div', class_='adr_c1').find(
-                            'span').get_text(
-                            strip=True).replace('\u00A0', '')
-                        if div_addres_store == shop_addr:
-                            enough = store.find_all('div', class_='adr_b2')[1].find(
-                                'span').get_text(
-                                strip=True).replace('\u00A0', '')
-                            print(f'  -- {enough}')
-                            break
-                except:
-                    print(
-                        f"Не удалось прочитать наличие товара {product_uri} в магазине {store_id}")
+                price_regular = await _get_price_regular(product_uri, soup,
+                                                         store_id)
+                enough = await _get_enough(product_uri, shop_addr, soup, store_id)
 
-            find_products_in_store.append(
-                {
-                    'title_sku': title_sku,
-                    'shop_addr': shop_addr,
-                    'price_regular': price_regular,
-                    'price_primary': price_primary,
-                    'discount': discount,
-                    'enough': enough,
-                    'url': url + product_uri
-                }
-            )
+                find_products_in_store.append(
+                    {
+                        'title_sku': title_sku,
+                        'shop_addr': shop_addr,
+                        'price_regular': price_regular,
+                        'price_primary': price_primary,
+                        'discount': discount,
+                        'enough': enough,
+                        'url': url + product_uri
+                    }
+                )
         find_products_in_stores[store_id] = find_products_in_store
     return find_products_in_stores
+
+
+async def _get_enough(product_uri, shop_addr, soup, store_id):
+    try:
+        store_list = soup.find('div',
+                               class_='lstcnt lstadr storeblock storelist').find_all(
+            'div', class_='adritm')
+        for store in store_list:
+            div_addres_store = store.find('div', class_='adr_c1').find(
+                'span').get_text(
+                strip=True).replace('\u00A0', '')
+            if div_addres_store == shop_addr:
+                enough = store.find_all('div', class_='adr_b2')[1].find(
+                    'span').get_text(
+                    strip=True).replace('\u00A0', '')
+                print(f'  -- {enough}')
+                break
+    except:
+        enough = ''
+        print(
+            f"Не удалось прочитать наличие товара {product_uri} в магазине {store_id}")
+    return enough
+
+
+async def _get_price_regular(product_uri, soup, store_id):
+    try:
+        price_regular = soup.find(
+            'div', class_='prd_rtp prd_rtp1').get_text(
+            strip=True).replace(
+            '\u00A0', '')
+        print(f'  -- Обычная цена {price_regular}:')
+    except:
+        price_regular = ''
+        print(
+            f'Не удалось прочитать обычную цену для товара {product_uri} в магазине {store_id}')
+    return price_regular
+
+
+async def _get_title_sku(product_uri, soup, store_id):
+    try:
+        title_sku = soup.find('div', class_='prd_hdr').getText(
+            strip=True).replace('\u00A0', '')
+        print(f'[+] Товар {title_sku}')
+    except:
+        title_sku = 'Не удалось прочитать наименование товара'
+        print(
+            f"Не удалось прочитать наименование товара {product_uri} в магазине {store_id}")
+    return title_sku
