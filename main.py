@@ -85,7 +85,8 @@ def _save_results_in_exl_file(products_in_stores, book, sheet, promotions_in_sto
     for key, values in products_in_stores.items():
         row += 1
         # Печатаем адрес магазина
-        sheet.write(row, 0, values[0]['shop_addr'], style_addres_store)
+        if values:
+            sheet.write(row, 0, values[0]['shop_addr'], style_addres_store)
         # Печатаем акции магазина
         row = _print_promo_in_store(key, promotions_in_stores, row, sheet, style_addres_store)
         row = _print_products_in_store(row, sheet, style_body, style_body_gray,
