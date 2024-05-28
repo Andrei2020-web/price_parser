@@ -9,6 +9,7 @@ import perekrestok_parser
 import globus_parser
 import sahalin_ryba_parser
 import alenka_parser
+import spar_parser
 
 pause_between_requests_products = {'begin': 5, 'end': 6}
 pause_between_requests_promos = {'begin': 2, 'end': 3}
@@ -230,7 +231,8 @@ async def main():
         globus_parser.get_promotions_in_stores(),
         globus_parser.get_products(),
         sahalin_ryba_parser.get_products(),
-        alenka_parser.get_products()
+        alenka_parser.get_products(),
+        spar_parser.get_products(),
     ]
              ]
 
@@ -269,6 +271,12 @@ async def main():
     _freeze_the_cell(sheet_alenka, 1)
     _save_products_in_json(results[6], 'alenka')
     _save_results_in_exl_file(results[6], book=workbook, sheet=sheet_alenka)
+
+    # --------------Спар-----------------
+    sheet_spar = _create_sheet(workbook, 'Спар')
+    _freeze_the_cell(sheet_spar, 1)
+    _save_products_in_json(results[7], 'spar')
+    _save_results_in_exl_file(results[7], book=workbook, sheet=sheet_spar)
 
     finish_time = time.time()
     print(f'Программа завершена за {finish_time - start_time} c.')
