@@ -155,7 +155,7 @@ async def get_products():
             if html:
                 soup = BeautifulSoup(html, 'lxml')
                 json_next_data = json.loads(
-                    soup.find('script', attrs={'id': '__NEXT_DATA__'}).string)
+                    soup.find_all('script', attrs={'id': ["__NEXT_DATA__", "ng-state"]})[0].string)
 
                 title_sku = await _get_title_sku(json_next_data, product_uri, store_id)
                 shop_addr = await _get_shop_addr(product_uri, soup, store_id)
@@ -187,13 +187,15 @@ async def get_products():
 
 
 async def _get_enough(product_uri, soup, store_id):
+    enough = ''
     try:
         div = \
             soup.find('span',
                       class_=[
                           'Badge_badge__w952k Badge_badge_color_greenSecondary__2cVlN Badge_badge_size_medium__feig9',
                           'Badge_badge__w952k Badge_badge_color_orangeSecondary__l7hYO Badge_badge_size_medium__feig9',
-                          'Badge_badge__w952k Badge_badge_color_redSecondary__i_Xad Badge_badge_size_medium__feig9'])
+                          'Badge_badge__w952k Badge_badge_color_redSecondary__i_Xad Badge_badge_size_medium__feig9',
+                      ])
         if div:
             enough = div.get_text(strip=True).replace('\u00A0', '')
             print(f'  -- {enough}')
