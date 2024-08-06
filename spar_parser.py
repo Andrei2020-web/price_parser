@@ -111,7 +111,7 @@ async def _get_price_primary(product_uri, soup, store_id, mass):
 async def _get_discount(product_uri, soup, store_id):
     try:
         discount = soup.find('span', class_='discount').get_text(
-            strip=True).replace('\u00A0', '').replace('−', '')
+            strip=True).replace('\u00A0', '').replace('−', '').replace('%', '')
         print(
             f'  -- Скидка {discount}')
     except:
