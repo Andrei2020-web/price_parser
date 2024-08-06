@@ -192,7 +192,7 @@ async def _get_duration_discount(product_uri, soup, store_id, title_sku):
 async def _get_discount(product_uri, soup, store_id):
     try:
         discount = soup.find('span', class_='sale--orang-mt').get_text(
-            strip=True).replace('\u00A0', '')
+            strip=True).replace('\u00A0', '').replace('-', '').replace('%', '')
         print(
             f'  -- Скидка {discount}')
     except:
