@@ -136,7 +136,7 @@ async def get_products():
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Cookie': f'CityCookie=msk; StoreSubDomainCookie={store_id}; CitySubDomainCookie=msk; Store={store_id}; DeliveryOptions=Pickup'
+            'Cookie': f'ShouldSetDeliveryOptions=False; DontShowCookieNotification=False; CityCookie=msk; StoreSubDomainCookie={store_id}; CitySubDomainCookie=msk; Store={store_id}; IsNextSiteAvailable=True; DeliveryOptions=Pickup',
         }
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
@@ -157,7 +157,7 @@ async def get_products():
                 json_next_data = json.loads(
                     soup.find_all('script', attrs={'id': ["__NEXT_DATA__", "ng-state"]})[0].string)
 
-                title_sku = await _get_title_sku(json_next_data, product_uri, store_id)
+                title_sku = await _get_title_sku(product_uri, soup, store_id)
                 shop_addr = await _get_shop_addr(product_uri, soup, store_id)
                 mass = await _get_mass(json_next_data, product_uri, store_id)
                 validityStartDate = await _getvalidityStartDay(json_next_data, product_uri,
@@ -169,7 +169,7 @@ async def get_products():
                                                          product_uri, store_id, validityEndDate,
                                                          validityStartDate)
                 discount = await _get_discount(json_next_data, product_uri, store_id)
-                enough = await _get_enough(product_uri, soup, store_id)
+                enough = await _get_enough(json_next_data, product_uri, store_id)
 
                 find_products_in_store.append(
                     {
@@ -186,21 +186,14 @@ async def get_products():
     return find_products_in_stores
 
 
-async def _get_enough(product_uri, soup, store_id):
-    enough = ''
+async def _get_enough(json_next_data, product_uri, store_id):
     try:
-        div = \
-            soup.find('span',
-                      class_=[
-                          'Badge_badge__w952k Badge_badge_color_greenSecondary__2cVlN Badge_badge_size_medium__feig9',
-                          'Badge_badge__w952k Badge_badge_color_orangeSecondary__l7hYO Badge_badge_size_medium__feig9',
-                          'Badge_badge__w952k Badge_badge_color_redSecondary__i_Xad Badge_badge_size_medium__feig9',
-                      ])
-        if div:
-            enough = div.get_text(strip=True).replace('\u00A0', '')
-            print(f'  -- {enough}')
+        enough = nested_lookup(
+            key='count',
+            document=json_next_data)[0]
+        print(f'  -- {enough}')
     except:
-        enough = ''
+        enough = 'Не удалось прочитать наличие товара'
         print(
             f"Не удалось прочитать наличие товара {product_uri} в магазине {store_id}")
     return enough
@@ -208,9 +201,9 @@ async def _get_enough(product_uri, soup, store_id):
 
 async def _get_discount(json_next_data, product_uri, store_id):
     try:
-        discount = nested_lookup(
-            key='offerDescription',
-            document=json_next_data)[0]
+        discount = int(nested_lookup(
+            key='title',
+            document=json_next_data)[0].replace('-', '').replace('%', ''))
         print(
             f'  -- Скидка {discount}')
     except:
@@ -223,12 +216,12 @@ async def _get_discount(json_next_data, product_uri, store_id):
 async def _get_price_primary(json_next_data, mass, product_uri, store_id,
                              validityEndDate, validityStartDate):
     try:
-        price_primary = nested_lookup(
-            key='discountPrice',
-            document=json_next_data)[0]
+        price_primary = str(nested_lookup(
+            key='cost',
+            document=json_next_data)[0])[0:-2]
         if mass:
             # Цена за килограмм
-            price_primary = f'{price_primary}\nЦена за кг {round(float(price_primary) * 1000 / mass, 2)}'
+            price_primary = f'{price_primary}\nЦена за кг {round(int(price_primary) * 1000 / mass, 2)}'
             # Инфа по актуальности цен
             if validityStartDate:
                 price_primary = f'{price_primary}\nс {validityStartDate} по {validityEndDate}'
@@ -242,12 +235,12 @@ async def _get_price_primary(json_next_data, mass, product_uri, store_id,
 
 async def _get_price_regular(json_next_data, mass, product_uri, store_id):
     try:
-        price_regular = nested_lookup(
-            key='regularPrice',
-            document=json_next_data)[0]
+        price_regular = str(nested_lookup(
+            key='costRegular',
+            document=json_next_data)[0])[0:-2]
         if mass:
             # Цена за килограмм
-            price_regular = f'{price_regular}\nЦена за кг {round(float(price_regular) * 1000 / mass, 2)}'
+            price_regular = f'{price_regular}\nЦена за кг {round(int(price_regular) * 1000 / mass, 2)}'
         print(f'  -- Обычная цена -- {price_regular}:')
     except:
         price_regular = ''
@@ -298,7 +291,7 @@ async def _get_mass(json_next_data, product_uri, store_id):
     try:
         mass = int(nested_lookup(
             key='package',
-            document=json_next_data)[0].replace(' г', '').replace(' мл', ''))
+            document=json_next_data)[0].replace(' ', '').replace('г', '').replace('мл', ''))
     except:
         mass = 0
         print(
@@ -319,11 +312,9 @@ async def _get_shop_addr(product_uri, soup, store_id):
     return shop_addr
 
 
-async def _get_title_sku(json_next_data, product_uri, store_id):
+async def _get_title_sku(product_uri, soup, store_id):
     try:
-        title_sku = nested_lookup(
-            key='title',
-            document=json_next_data)[0]
+        title_sku = soup.find('title').string
         print(f'[+] Товар {title_sku}')
     except:
         title_sku = 'Не удалось прочитать наименование товара'

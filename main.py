@@ -11,7 +11,7 @@ import sahalin_ryba_parser
 import alenka_parser
 import spar_parser
 
-pause_between_requests_products = {'begin': 5, 'end': 6}
+pause_between_requests_products = {'begin': 10, 'end': 15}
 pause_between_requests_promos = {'begin': 2, 'end': 3}
 pause_between_attempts_to_get_html = 30
 number_of_attempts = 3
@@ -99,12 +99,12 @@ def _save_results_in_exl_file(products_in_stores, book, sheet, promotions_in_sto
 
 def _print_products_in_store(row, sheet, style_body, style_body_gray,
                              style_body_green, style_body_red, values):
-    net_v_nalichii = ['Товар закончился', 'Нет в наличии']
+    net_v_nalichii = ['Нет в наличии', 0]
     for value in values:
         row += 1
         style = style_body
         if value['discount']:
-            discount = int(value['discount'].replace('-', '').replace('%', ''))
+            discount = int(value['discount'])
             if 25 <= discount < 50:
                 style = style_body_green
             if discount >= 50:
@@ -225,7 +225,6 @@ async def main():
     workbook = _create_workbook()
 
     tasks = [asyncio.create_task(_) for _ in [
-        lenta_parser.get_promotions_in_stores(),
         lenta_parser.get_products(),
         perekrestok_parser.get_products(),
         globus_parser.get_promotions_in_stores(),
@@ -241,42 +240,40 @@ async def main():
     # --------------Лента-----------------
     sheetLenta = _create_sheet(workbook, 'Лента')
     _freeze_the_cell(sheetLenta, 1)
-    _save_promotions_in_json(results[0], 'lenta')
     _save_products_in_json(results[1], 'lenta')
-    _save_results_in_exl_file(results[1], book=workbook, sheet=sheetLenta,
-                              promotions_in_stores=results[0])
+    _save_results_in_exl_file(results[0], book=workbook, sheet=sheetLenta)
 
     # --------------Перекрёсток-----------------
     sheetPerekrestok = _create_sheet(workbook, 'Перекрёсток')
     _freeze_the_cell(sheetPerekrestok, 1)
     _save_products_in_json(results[2], 'perekrestok')
-    _save_results_in_exl_file(results[2], book=workbook, sheet=sheetPerekrestok)
+    _save_results_in_exl_file(results[1], book=workbook, sheet=sheetPerekrestok)
 
     # --------------Глобус-----------------
     sheet_globus = _create_sheet(workbook, 'Глобус')
     _freeze_the_cell(sheet_globus, 1)
     _save_promotions_in_json(results[3], 'globus')
     _save_products_in_json(results[4], 'globus')
-    _save_results_in_exl_file(results[4], book=workbook, sheet=sheet_globus,
-                              promotions_in_stores=results[3])
+    _save_results_in_exl_file(results[3], book=workbook, sheet=sheet_globus,
+                              promotions_in_stores=results[2])
 
     # --------------Сахалин рыба-----------------
     sheet_sahalin_ryba = _create_sheet(workbook, 'Сахалин рыба')
     _freeze_the_cell(sheet_sahalin_ryba, 1)
     _save_products_in_json(results[5], 'sahalin_ryba')
-    _save_results_in_exl_file(results[5], book=workbook, sheet=sheet_sahalin_ryba)
+    _save_results_in_exl_file(results[4], book=workbook, sheet=sheet_sahalin_ryba)
 
     # --------------Алёнка-----------------
     sheet_alenka = _create_sheet(workbook, 'Алёнка')
     _freeze_the_cell(sheet_alenka, 1)
     _save_products_in_json(results[6], 'alenka')
-    _save_results_in_exl_file(results[6], book=workbook, sheet=sheet_alenka)
+    _save_results_in_exl_file(results[5], book=workbook, sheet=sheet_alenka)
 
     # --------------Спар-----------------
     sheet_spar = _create_sheet(workbook, 'Спар')
     _freeze_the_cell(sheet_spar, 1)
     _save_products_in_json(results[7], 'spar')
-    _save_results_in_exl_file(results[7], book=workbook, sheet=sheet_spar)
+    _save_results_in_exl_file(results[6], book=workbook, sheet=sheet_spar)
 
     finish_time = time.time()
     print(f'Программа завершена за {finish_time - start_time} c.')
