@@ -59,7 +59,7 @@ async def get_products():
 async def _get_discount(product_uri, soup):
     try:
         discount = soup.find('div', class_='sc-hjWSTT hMdZRn').find(
-            'span').get_text(strip=True).replace('\u00A0', '')
+            'span').get_text(strip=True).replace('\u00A0', '').replace('-', '').replace('%', '')
         print(f'  -- Скидка {discount}')
     except:
         discount = ''
