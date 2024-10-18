@@ -1,8 +1,8 @@
 import asyncio
 from bs4 import BeautifulSoup
+import utils
 import random
 import lxml
-import main
 
 # id и имена магазинов. Например: [[77, '^%^D0^%^A2^%^D1^%^83^%^D0^%^BB^%^D0^%^B0']]
 stores_id = [
@@ -28,20 +28,20 @@ async def get_promotions_in_stores():
             'Cookie': f'globus_hyper_id={store_id[0]}; globus_hyper_name={store_id[1]}; globus_hyper_show_select=1'
         }
         # Кол-во повторов, чтобы получить html документ с акциями
-        for i in range(main.number_of_attempts):
+        for i in range(utils.number_of_attempts):
             # Пауза между запросами, помогает при блокировке запросов сайтом
-            sleep_time = round(random.uniform(main.pause_between_requests_promos['begin'],
-                                              main.pause_between_requests_promos['end']), 2)
+            sleep_time = round(random.uniform(utils.pause_between_requests_promos['begin'],
+                                              utils.pause_between_requests_promos['end']), 2)
             print(f'засыпаю на {sleep_time} c.')
             await asyncio.sleep(sleep_time)
-            html = await main.get_html(url, promotions_uri, headers)
+            html = await utils.get_html(url, promotions_uri, headers)
             if html:
                 break
             else:
                 # Пауза между попытками
-                await asyncio.sleep(main.pause_between_attempts_to_get_html)
+                await asyncio.sleep(utils.pause_between_attempts_to_get_html)
         if html:
-            soup = BeautifulSoup(html, 'lxml')
+            soup = BeautifulSoup(html[0], 'lxml')
             try:
                 actions_in_globus = soup.find('div', id='actions-in-globus').find(
                     'div', class_='js-carousel-adaptive').find_all('div', class_='block')
@@ -116,22 +116,22 @@ async def get_products():
         }
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
-            for i in range(main.number_of_attempts):
+            for i in range(utils.number_of_attempts):
                 # Пауза между запросами, помогает при блокировке запросов сайтом
-                sleep_time = round(random.uniform(main.pause_between_requests_products['begin'],
-                                                  main.pause_between_requests_products['end']), 2)
+                sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
+                                                  utils.pause_between_requests_products['end']), 2)
                 await asyncio.sleep(sleep_time)
                 print(f'засыпаю на {sleep_time} c.')
-                html = await main.get_html(url, product_uri, headers)
+                html = await utils.get_html(url, product_uri, headers)
                 if html:
                     break
                 else:
                     # Пауза между попытками
-                    await asyncio.sleep(main.pause_between_attempts_to_get_html)
+                    await asyncio.sleep(utils.pause_between_attempts_to_get_html)
 
             if html:
                 enough = ''
-                soup = BeautifulSoup(html, 'lxml')
+                soup = BeautifulSoup(html[0], 'lxml')
                 title_sku = await _get_title_sku(product_uri, soup, store_id)
                 shop_addr = await _get_shop_addr(product_uri, soup, store_id)
                 price_regular = await _get_price_regular(product_uri, soup,
@@ -191,8 +191,9 @@ async def _get_duration_discount(product_uri, soup, store_id, title_sku):
 
 async def _get_discount(product_uri, soup, store_id):
     try:
-        discount = soup.find('span', class_='sale--orang-mt').get_text(
-            strip=True).replace('\u00A0', '').replace('-', '').replace('%', '')
+        dic = {'\u00A0': '', '-': '', '%': ''}
+        discount = int(utils.replace_all(soup.find('span', class_='sale--orang-mt').get_text(
+            strip=True), dic))
         print(
             f'  -- Скидка {discount}')
     except:
