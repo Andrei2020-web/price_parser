@@ -1,8 +1,8 @@
 import asyncio
 from bs4 import BeautifulSoup
+import utils
 import random
 import lxml
-import main
 
 url = 'https://myspar.ru'
 
@@ -27,18 +27,18 @@ async def get_products():
         }
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
-            for i in range(main.number_of_attempts):
+            for i in range(utils.number_of_attempts):
                 # Пауза между запросами, помогает при блокировке запросов сайтом
-                sleep_time = round(random.uniform(main.pause_between_requests_products['begin'],
-                                                  main.pause_between_requests_products['end']), 2)
+                sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
+                                                  utils.pause_between_requests_products['end']), 2)
                 await asyncio.sleep(sleep_time)
                 print(f'засыпаю на {sleep_time} c.')
-                html, headers = await main.get_html(url, product_uri, headers)
+                html = await utils.get_html(url, product_uri, headers)
                 if html:
                     break
                 else:
                     # Пауза между попытками
-                    await asyncio.sleep(main.pause_between_attempts_to_get_html)
+                    await asyncio.sleep(utils.pause_between_attempts_to_get_html)
             if html:
                 enough = ''
                 shop_addr = 'Спар'
@@ -79,9 +79,10 @@ async def _get_title_sku(product_uri, soup, store_id):
 
 async def _get_price_regular(product_uri, soup, store_id, mass):
     try:
-        price_regular = soup.find('span',
-                                  class_='prices__old').get_text(
-            strip=True).replace('\u00A0', '').replace('₽', '').replace(',', '.').replace(' ', '')
+        dic = {'\u00A0': '', '₽': '', ',': '.', ' ': ''}
+        price_regular = utils.replace_all(soup.find('span',
+                                                    class_='prices__old').get_text(
+            strip=True), dic)
         if mass:
             price_regular = f'{price_regular}\nЦена за кг {round(float(price_regular) * 1000 / mass, 2)}'
         print(f'  -- Обычная цена {price_regular}:')
@@ -94,9 +95,10 @@ async def _get_price_regular(product_uri, soup, store_id, mass):
 
 async def _get_price_primary(product_uri, soup, store_id, mass):
     try:
-        price_primary = soup.find('span',
-                                  class_='prices__cur js-item-price').get_text(
-            strip=True).replace('\u00A0', '').replace('₽', '').replace(',', '.').replace(' ', '')
+        dic = {'\u00A0': '', '₽': '', ',': '.', ' ': ''}
+        price_primary = utils.replace_all(soup.find('span',
+                                                    class_='prices__cur js-item-price').get_text(
+            strip=True), dic)
         if mass:
             price_primary = f'{price_primary}\nЦена за кг {round(float(price_primary) * 1000 / mass, 2)}'
         print(
@@ -110,8 +112,9 @@ async def _get_price_primary(product_uri, soup, store_id, mass):
 
 async def _get_discount(product_uri, soup, store_id):
     try:
-        discount = soup.find('span', class_='discount').get_text(
-            strip=True).replace('\u00A0', '').replace('−', '').replace('%', '')
+        dic = {'\u00A0': '', '−': '', '%': ''}
+        discount = int(utils.replace_all(soup.find('span', class_='discount').get_text(
+            strip=True), dic))
         print(
             f'  -- Скидка {discount}')
     except:
