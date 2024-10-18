@@ -1,8 +1,8 @@
 import asyncio
 from bs4 import BeautifulSoup
+import utils
 import random
 import lxml
-import main
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0',
@@ -21,22 +21,22 @@ async def get_products():
     products_in_store = {'Перекрёсток': products}
     for product_uri in products_uri:
         # Кол-во повторов, чтобы получить html документ с товаром
-        for i in range(main.number_of_attempts):
+        for i in range(utils.number_of_attempts):
             # Пауза между запросами, помогает при блокировке запросов сайтом
-            sleep_time = round(random.uniform(main.pause_between_requests_products['begin'],
-                                              main.pause_between_requests_products['end']), 2)
+            sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
+                                              utils.pause_between_requests_products['end']), 2)
             print(f'засыпаю на {sleep_time} c.')
             await asyncio.sleep(sleep_time)
-            html = await main.get_html(url, product_uri, headers)
+            html = await utils.get_html(url, product_uri, headers)
             if html:
                 break
             else:
                 # Пауза между попытками
-                await asyncio.sleep(main.number_of_attempts)
+                await asyncio.sleep(utils.number_of_attempts)
         if html:
             enough = ''
             shop_addr = 'Перекрёсток'
-            soup = BeautifulSoup(html, 'lxml')
+            soup = BeautifulSoup(html[0], 'lxml')
             title_sku = await _get_title_sku(product_uri, soup)
             promotion = await _get_promotion(product_uri, soup)
             if promotion:
@@ -58,8 +58,9 @@ async def get_products():
 
 async def _get_discount(product_uri, soup):
     try:
-        discount = soup.find('div', class_='sc-hjWSTT hMdZRn').find(
-            'span').get_text(strip=True).replace('\u00A0', '').replace('-', '').replace('%', '')
+        dic = {'\u00A0': '', '-': '', '%': ''}
+        discount = int(utils.replace_all(soup.find('div', class_='sc-hjWSTT hMdZRn').find(
+            'span').get_text(strip=True), dic))
         print(f'  -- Скидка {discount}')
     except:
         discount = ''
@@ -71,9 +72,9 @@ async def _get_discount(product_uri, soup):
 async def _get_price_primary(product_uri, soup):
     try:
         price_wrapper = soup.find('div', class_='Flex-brknwi-0 jRbnzW')
-        price_primary = price_wrapper.find(
-            'div', class_='price-new').contents[-1].strip().replace('\u00A0', '').replace(
-            '₽', '')
+        dic = {'\u00A0': '', '₽': ''}
+        price_primary = utils.replace_all(price_wrapper.find(
+            'div', class_='price-new').contents[-1].strip(), dic)
         print(f'  -- Цена по карте: {price_primary}')
     except:
         price_primary = ''
@@ -86,9 +87,10 @@ async def _get_price_regular(product_uri, soup):
     try:
         price_wrapper = soup.find('div', class_='Flex-brknwi-0 jRbnzW')
         price_old_wrapper = price_wrapper.find('div', class_='price-old-wrapper')
-        price_regular = price_old_wrapper.find('div',
-                                               class_='price-old').contents[
-            -1].strip().replace('\u00A0', '').replace('₽', '')
+        dic = {'\u00A0': '', '₽': ''}
+        price_regular = utils.replace_all(price_old_wrapper.find('div',
+                                                           class_='price-old').contents[
+                                        -1].strip(), dic)
         print(f'  -- Обычная цена {price_regular}:')
     except:
         price_regular = ''
