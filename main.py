@@ -13,7 +13,7 @@ import work_with_json
 async def main():
     start_time = time.time()
 
-    workbook = work_with_exl._create_workbook()
+    workbook = work_with_exl.create_workbook()
 
     tasks = [asyncio.create_task(_) for _ in [
         lenta_parser.get_products(),
@@ -29,42 +29,42 @@ async def main():
     results = await asyncio.gather(*tasks)
 
     # --------------Лента-----------------
-    sheetLenta = work_with_exl._create_sheet(workbook, 'Лента')
-    work_with_exl._freeze_the_cell(sheetLenta, 1)
-    work_with_json._save_products_in_json(results[1], 'lenta')
-    work_with_exl._save_results_in_exl_file(results[0], book=workbook, sheet=sheetLenta)
+    sheetLenta = work_with_exl.create_sheet(workbook, 'Лента')
+    work_with_exl.freeze_the_cell(sheetLenta, 1)
+    work_with_json.save_products_in_json(results[0], 'lenta')
+    work_with_exl.save_results_in_exl_file(results[0], book=workbook, sheet=sheetLenta)
 
     # --------------Перекрёсток-----------------
-    sheetPerekrestok = work_with_exl._create_sheet(workbook, 'Перекрёсток')
-    work_with_exl._freeze_the_cell(sheetPerekrestok, 1)
-    work_with_json._save_products_in_json(results[2], 'perekrestok')
-    work_with_exl._save_results_in_exl_file(results[1], book=workbook, sheet=sheetPerekrestok)
+    sheetPerekrestok = work_with_exl.create_sheet(workbook, 'Перекрёсток')
+    work_with_exl.freeze_the_cell(sheetPerekrestok, 1)
+    work_with_json.save_products_in_json(results[1], 'perekrestok')
+    work_with_exl.save_results_in_exl_file(results[1], book=workbook, sheet=sheetPerekrestok)
 
     # --------------Глобус-----------------
-    sheet_globus = work_with_exl._create_sheet(workbook, 'Глобус')
-    work_with_exl._freeze_the_cell(sheet_globus, 1)
-    work_with_json._save_promotions_in_json(results[3], 'globus')
-    work_with_json._save_products_in_json(results[4], 'globus')
-    work_with_exl._save_results_in_exl_file(results[3], book=workbook, sheet=sheet_globus,
+    sheet_globus = work_with_exl.create_sheet(workbook, 'Глобус')
+    work_with_exl.freeze_the_cell(sheet_globus, 1)
+    work_with_json.save_promotions_in_json(results[2], 'globus')
+    work_with_json.save_products_in_json(results[3], 'globus')
+    work_with_exl.save_results_in_exl_file(results[3], book=workbook, sheet=sheet_globus,
                                             promotions_in_stores=results[2])
 
     # --------------Сахалин рыба-----------------
-    sheet_sahalin_ryba = work_with_exl._create_sheet(workbook, 'Сахалин рыба')
-    work_with_exl._freeze_the_cell(sheet_sahalin_ryba, 1)
-    work_with_json._save_products_in_json(results[5], 'sahalin_ryba')
-    work_with_exl._save_results_in_exl_file(results[4], book=workbook, sheet=sheet_sahalin_ryba)
+    sheet_sahalin_ryba = work_with_exl.create_sheet(workbook, 'Сахалин рыба')
+    work_with_exl.freeze_the_cell(sheet_sahalin_ryba, 1)
+    work_with_json.save_products_in_json(results[4], 'sahalin_ryba')
+    work_with_exl.save_results_in_exl_file(results[4], book=workbook, sheet=sheet_sahalin_ryba)
 
     # --------------Алёнка-----------------
-    sheet_alenka = work_with_exl._create_sheet(workbook, 'Алёнка')
-    work_with_exl._freeze_the_cell(sheet_alenka, 1)
-    work_with_json._save_products_in_json(results[6], 'alenka')
-    work_with_exl._save_results_in_exl_file(results[5], book=workbook, sheet=sheet_alenka)
+    sheet_alenka = work_with_exl.create_sheet(workbook, 'Алёнка')
+    work_with_exl.freeze_the_cell(sheet_alenka, 1)
+    work_with_json.save_products_in_json(results[5], 'alenka')
+    work_with_exl.save_results_in_exl_file(results[5], book=workbook, sheet=sheet_alenka)
 
     # --------------Спар-----------------
-    sheet_spar = work_with_exl._create_sheet(workbook, 'Спар')
-    work_with_exl._freeze_the_cell(sheet_spar, 1)
-    work_with_json._save_products_in_json(results[7], 'spar')
-    work_with_exl._save_results_in_exl_file(results[6], book=workbook, sheet=sheet_spar)
+    sheet_spar = work_with_exl.create_sheet(workbook, 'Спар')
+    work_with_exl.freeze_the_cell(sheet_spar, 1)
+    work_with_json.save_products_in_json(results[6], 'spar')
+    work_with_exl.save_results_in_exl_file(results[6], book=workbook, sheet=sheet_spar)
 
     finish_time = time.time()
     print(f'Программа завершена за {finish_time - start_time} c.')
