@@ -1,8 +1,8 @@
 import asyncio
 from bs4 import BeautifulSoup
+import utils
 import random
 import lxml
-import main
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0',
@@ -25,22 +25,22 @@ async def get_products():
         find_products_in_store = []
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
-            for i in range(main.number_of_attempts):
+            for i in range(utils.number_of_attempts):
                 # Пауза между запросами, помогает при блокировке запросов сайтом
-                sleep_time = round(random.uniform(main.pause_between_requests_products['begin'],
-                                                  main.pause_between_requests_products['end']), 2)
+                sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
+                                                  utils.pause_between_requests_products['end']), 2)
                 print(f'засыпаю на {sleep_time} c.')
                 await asyncio.sleep(sleep_time)
-                html = await main.get_html(url, product_uri, headers)
+                html = await utils.get_html(url, product_uri, headers)
                 if html:
                     break
                 else:
                     # Пауза между попытками
-                    await asyncio.sleep(main.pause_between_attempts_to_get_html)
+                    await asyncio.sleep(utils.pause_between_attempts_to_get_html)
             if html:
                 price_primary = ''
                 discount = ''
-                soup = BeautifulSoup(html, 'lxml')
+                soup = BeautifulSoup(html[0], 'lxml')
                 title_sku = await _get_title_sku(product_uri, soup, store_id)
                 shop_addr = store_id
                 print(f'  -- В магазине {shop_addr}:')
