@@ -2,7 +2,7 @@ import datetime
 import xlwt
 
 
-def _save_results_in_exl_file(products_in_stores, book, sheet, promotions_in_stores=[]):
+def save_results_in_exl_file(products_in_stores, book, sheet, promotions_in_stores=[]):
     # Записываем результат в таблицу exl
 
     # Устанавливаем ширину столбца
@@ -163,16 +163,16 @@ def _set_word_wrap():
     return alignment
 
 
-def _create_workbook():
+def create_workbook():
     return xlwt.Workbook(encoding="utf-8")
 
 
-def _create_sheet(workbook, stores_name=''):
+def create_sheet(workbook, stores_name=''):
     return workbook.add_sheet(
         f'{stores_name}', cell_overwrite_ok=True)
 
 
-def _freeze_the_cell(sheet, cell_position):
+def freeze_the_cell(sheet, cell_position):
     sheet.set_horz_split_pos(cell_position)
     sheet.panes_frozen = True
     sheet.remove_splits = True
