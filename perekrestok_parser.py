@@ -59,8 +59,9 @@ async def get_products():
 async def _get_discount(product_uri, soup):
     try:
         dic = {'\u00A0': '', '-': '', '%': ''}
-        discount = int(utils.replace_all(soup.find('div', class_='sc-hjWSTT hMdZRn').find(
-            'span').get_text(strip=True), dic))
+        discount = int(utils.replace_all(soup.find(attrs={
+            'class': ['sc-hjWSTT hMdZRn',
+                      'sc-httYss iSBbxs']}).find('span').get_text(strip=True), dic))
         print(f'  -- Скидка {discount}')
     except:
         discount = ''

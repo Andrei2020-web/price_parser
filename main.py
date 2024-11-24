@@ -67,7 +67,7 @@ async def main():
     work_with_exl.save_results_in_exl_file(results[6], book=workbook, sheet=sheet_spar)
 
     finish_time = time.time()
-    print(f'Программа завершена за {finish_time - start_time} c.')
+    print(f'Программа завершена за {round((finish_time - start_time) / 60, 2)} минут.')
 
 
 if __name__ == '__main__':
