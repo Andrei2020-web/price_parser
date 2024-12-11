@@ -14,11 +14,8 @@ headers = {
 # id магазинов. Например: ['г. Москва, ул Новокузнецкая, д 13 стр 1',]
 stores_id = []
 
-url = 'https://borisik.ru'
-
 # Список любимых товаров. Например: ['/catalog/goods/bokovnik-nerki-kh-k-1kg/',]
 products_uri = []
-
 
 async def get_products():
     find_products_in_stores = {}
@@ -28,7 +25,7 @@ async def get_products():
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
             for i in range(utils.number_of_attempts):
-                # Пауза между запросами, помогает при блокировке запросов сайтом
+                # Пауза между запросами
                 sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
                                                   utils.pause_between_requests_products['end']), 2)
                 print(f'засыпаю на {sleep_time} c.')

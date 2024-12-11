@@ -8,7 +8,7 @@ import lxml
 
 url = 'https://www.lenta.com'
 
-# id магазинов. Например: [1453, 1413]
+# id магазинов. Например: ['Москва, Красная пресня ул., 23, к. Б, стр. 1',]
 stores_id = []
 
 # Список любимых товаров. Например: ['/product/mango-prochie-tovary-speloe-egipet-ves-662614/',]
@@ -23,7 +23,7 @@ async def get_products():
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
             for i in range(utils.number_of_attempts):
-                # Пауза между запросами, помогает при блокировке запросов сайтом
+                # Пауза между запросами
                 sleep_time = round(random.uniform(utils.pause_between_requests_products['begin'],
                                                   utils.pause_between_requests_products['end']), 2)
                 print(f'засыпаю на {sleep_time} c.')
