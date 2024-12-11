@@ -6,10 +6,10 @@ import random
 import json
 import lxml
 
+url = 'https://www.lenta.com'
+
 # id магазинов. Например: [1453, 1413]
 stores_id = []
-
-url = 'https://www.lenta.com'
 
 # Список любимых товаров. Например: ['/product/mango-prochie-tovary-speloe-egipet-ves-662614/',]
 products_uri = []

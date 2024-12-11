@@ -21,10 +21,6 @@ async def get_products():
 
     for store_id in stores_id:
         find_products_in_store = []
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        }
         for product_uri in products_uri:
             # Кол-во повторов, чтобы получить html документ с товаром
             for i in range(utils.number_of_attempts):
@@ -33,7 +29,7 @@ async def get_products():
                                                   utils.pause_between_requests_products['end']), 2)
                 await asyncio.sleep(sleep_time)
                 print(f'засыпаю на {sleep_time} c.')
-                html = await utils.get_html(url, product_uri, headers)
+                html = await utils.get_html(url, product_uri)
                 if html:
                     break
                 else:

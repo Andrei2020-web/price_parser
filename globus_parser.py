@@ -4,12 +4,12 @@ import utils
 import random
 import lxml
 
+url = 'https://www.globus.ru'
+
 # id и имена магазинов. Например: [[77, '^%^D0^%^A2^%^D1^%^83^%^D0^%^BB^%^D0^%^B0']]
 stores_id = [
     [],
 ]
-
-url = 'https://www.globus.ru'
 
 # Акции
 promotions_uri = '/promo/'

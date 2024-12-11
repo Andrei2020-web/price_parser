@@ -70,7 +70,8 @@ def save_results_in_exl_file(products_in_stores, book, sheet, promotions_in_stor
 
 def _print_products_in_store(row, sheet, style_body, style_body_gray,
                              style_body_green, style_body_red, values):
-    net_v_nalichii = ['Нет в наличии', 'В наличии 0 шт', 'В наличии 0.0 кг']
+    net_v_nalichii = ['Нет в наличии', 'В наличии 0 шт', 'В наличии 0.0 кг', 'Нет в магазине',
+                      'Товар раскупили']
     for value in values:
         row += 1
         style = style_body
