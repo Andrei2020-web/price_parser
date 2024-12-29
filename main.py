@@ -6,6 +6,7 @@ import globus_parser
 import sahalin_ryba_parser
 import alenka_parser
 import spar_parser
+import pyaterochka_parser
 import work_with_exl
 import work_with_json
 
@@ -23,6 +24,7 @@ async def main():
         sahalin_ryba_parser.get_products(),
         alenka_parser.get_products(),
         spar_parser.get_products(),
+        pyaterochka_parser.get_products(),
     ]
              ]
 
@@ -65,6 +67,12 @@ async def main():
     work_with_exl.freeze_the_cell(sheet_spar, 1)
     work_with_json.save_products_in_json(results[6], 'spar')
     work_with_exl.save_results_in_exl_file(results[6], book=workbook, sheet=sheet_spar)
+
+    # --------------Пятёрочка-----------------
+    sheet_pyaterochka = work_with_exl.create_sheet(workbook, 'Пятёрочка')
+    work_with_exl.freeze_the_cell(sheet_pyaterochka, 1)
+    work_with_json.save_products_in_json(results[7], 'pyaterochka')
+    work_with_exl.save_results_in_exl_file(results[7], book=workbook, sheet=sheet_pyaterochka)
 
     finish_time = time.time()
     print(f'Программа завершена за {round((finish_time - start_time) / 60, 2)} минут.')

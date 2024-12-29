@@ -3,7 +3,7 @@ import asyncio
 import spar_parser
 import lenta_parser
 import perekrestok_parser
-from selenium import webdriver
+import pyaterochka_parser
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -23,19 +23,27 @@ async def get_html(url, product_uri, headers=None, any_parameters=None):
         chrom_driver_lenta = None
         chrom_driver_spar = None
         chrom_driver_perekrestok = None
+        chrom_driver_pyaterochka = None
+
         # Если это Спар
         if url == spar_parser.url:
             chrom_driver_spar = await _create_a_Chrome_driver()
             return await _get_spar_html(chrom_driver_spar, product_uri, url)
+
         # Если это Лента
         elif url == lenta_parser.url:
             chrom_driver_lenta = await _create_a_Chrome_driver()
             return await _get_lenta_html(chrom_driver_lenta, product_uri, url, any_parameters)
+
         # Если это Перекрёсток
         elif url == perekrestok_parser.url:
             chrom_driver_perekrestok = await _create_a_Chrome_driver()
             return await _get_perekrestok_html(chrom_driver_perekrestok, product_uri, url,
-                                         any_parameters)
+                                               any_parameters)
+        # Если это Пятёрочка
+        elif url == pyaterochka_parser.url:
+            chrom_driver_pyaterochka = await _create_a_Chrome_driver()
+            return await _get_pyaterochka_html(chrom_driver_pyaterochka, product_uri, url)
         # Асинхронные запросы через aiohttp для остальных магазинов
         else:
             async with aiohttp.ClientSession() as session:
@@ -57,11 +65,12 @@ async def get_html(url, product_uri, headers=None, any_parameters=None):
             await _close_a_Chrome_driver(chrom_driver_lenta)
         if chrom_driver_perekrestok:
             await _close_a_Chrome_driver(chrom_driver_perekrestok)
+        if chrom_driver_pyaterochka:
+            await _close_a_Chrome_driver(chrom_driver_pyaterochka)
 
 
 async def _get_spar_html(chrom_driver_spar, product_uri, url):
     await _exec_request(chrom_driver_spar, product_uri, url)
-    await asyncio.sleep(1)
     return chrom_driver_spar.page_source
 
 
@@ -225,7 +234,7 @@ async def _create_a_Chrome_driver():
 
 async def _exec_request(driver, product_uri, url):
     driver.maximize_window()
-    if url == spar_parser.url:
+    if url == spar_parser.url or url == pyaterochka_parser.url:
         driver.minimize_window()
 
     driver.get(url + product_uri)
@@ -263,3 +272,19 @@ def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
     return text
+
+async def _get_pyaterochka_html(chrom_driver_pyaterochka, product_uri, url):
+    # Сначала открываем карточку с товаром
+    await _exec_request(chrom_driver_pyaterochka, product_uri, url)
+    # Ждём пока не появится заголовок
+    await _get_title_text(chrom_driver_pyaterochka)
+    return chrom_driver_pyaterochka.page_source
+
+async def _get_title_text(chrom_driver):
+    return WebDriverWait(chrom_driver, timeout=50).until(
+        EC.any_of(
+            EC.element_to_be_clickable((By.CLASS_NAME, 'chakra-text ypBDwsIV- css-0')),
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div[2]/div[3]/div[2]/div[2]/div[1]/div[1]/h1')),
+
+        )
+    )
