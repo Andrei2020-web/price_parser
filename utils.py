@@ -4,6 +4,7 @@ import spar_parser
 import lenta_parser
 import perekrestok_parser
 import pyaterochka_parser
+from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
