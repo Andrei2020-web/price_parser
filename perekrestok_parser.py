@@ -96,7 +96,7 @@ async def _get_price_primary(product_uri, soup, store_id, mass):
 async def _get_price_regular(product_uri, soup, store_id, mass):
     try:
         dic = {'\u00A0': '', '₽': ''}
-        price_regular = soup.find('div', class_='Flex-brknwi-0 jRbnzW').contents[-1].text
+        price_regular = soup.find('div', class_='Flex-brknwi-0 jRbnzW').find('div', class_='price-old').contents[-1].text
         price_regular = utils.replace_all(price_regular.split(',')[0], dic)
         if mass and mass != 1:
             # Цена за килограмм
