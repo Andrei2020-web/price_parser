@@ -148,7 +148,7 @@ async def _press_button_zabrat(chrom_driver):
         EC.any_of(
             # Лента
             EC.element_to_be_clickable((By.XPATH,
-                                        '/html/body/p-dynamicdialog/div/div/div[2]/lu-popup-base/div/div/lu-address-edit-popup/lu-pickup-select/lu-pickup-select-b2c/div/div[1]/div[2]/button[1]')),
+                                        '/html/body/p-dynamicdialog/div/div/div[2]/lu-popup-base/div/div/lu-address-edit-popup/div/lu-pickup-select/lu-pickup-select-b2c/div/div[1]/div[2]/button[1]')),
             # Перекрёсток
             EC.element_to_be_clickable((By.XPATH,
                                         '/html/body/div[8]/div[2]/div/div/div/div/div[2]/div/div[4]/div/div/div/button')),
